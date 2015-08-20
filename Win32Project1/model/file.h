@@ -23,6 +23,7 @@ namespace file_maker
 		void replace_shape(int shape_id, std::shared_ptr<Shape> new_shape);
 		std::shared_ptr<Shape> get_shape(int shape_id);
 		vector<std::shared_ptr<Shape>> get_shape_list();
+		static void remove_all();
 	};
 }
 #endif

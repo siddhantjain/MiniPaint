@@ -487,6 +487,8 @@ void doFileOpen(HWND hDlg)
 
 	if (GetOpenFileName(&ofn1))
 	{
+		//renoving all the present objects from shapeList
+		File::remove_all();
 
 		//storing the filename
 		char *fileName;

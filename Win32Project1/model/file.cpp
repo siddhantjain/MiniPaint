@@ -69,7 +69,10 @@ std::shared_ptr<Shape> File::get_shape(int shape_id)
 	else
 		return *(it);
 }
-
+void File::remove_all()
+{
+	shape_list.clear();
+}
 vector<std::shared_ptr<Shape>> File::get_shape_list()
 {
 	return shape_list;
