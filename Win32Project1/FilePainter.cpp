@@ -40,7 +40,7 @@ void FilePainter::show_bounding_box(int selected_shape_id)
 	shared_ptr<Shape> temp_shape = temp_file.get_shape(selected_shape_id);
 	if (temp_shape != NULL)
 	{
-		HPEN dashed_pen = CreatePen(PS_DASH, 1 , RGB(0,0,0));
+		HPEN dashed_pen = CreatePen(PS_DASHDOTDOT, 1 , RGB(0,0,0));
 		SelectObject(hdc, dashed_pen);
 		SelectObject(hdc, ::GetStockObject(NULL_BRUSH));
 		::Rectangle(hdc, temp_shape->get_topleft_x(), temp_shape->get_topleft_y(), temp_shape->get_bottomright_x(), temp_shape->get_bottomright_y());
