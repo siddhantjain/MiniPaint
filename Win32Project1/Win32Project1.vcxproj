@@ -79,6 +79,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FilePainter.h" />
     <ClInclude Include="model\Circle.h" />
     <ClInclude Include="model\Command.h" />
     <ClInclude Include="model\CommandFactory.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="Win32Project1.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilePainter.cpp" />
     <ClCompile Include="model\Circle.cpp" />
     <ClCompile Include="model\Delete.cpp" />
     <ClCompile Include="model\Draw.cpp" />

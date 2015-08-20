@@ -14,14 +14,14 @@ using namespace std;
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-int shapeValue=-1;										//SJ: remove this global variable
-int commandValue=-1;									//SJ: remove these global variables
+int shapeValue = -1;										//SJ: remove this global variable
+int commandValue = -1;									//SJ: remove these global variables
 int numOfShapes = 0;									//SJ:This limits the number of total number of shapes to range of int.
 int cur_color = 0;
 POINT startPt;
 POINT currentPt;
-bool lButtonPress=false;
-bool insert_shape=false;
+bool lButtonPress = false;
+bool insert_shape = false;
 ShapeFactoryPtr shapeFactoryPtr(new ShapeFactory);
 CommandFactoryPtr commandFactoryPtr(new CommandFactory);
 
@@ -39,14 +39,14 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y);
 void onMouseMove(HWND hWnd, UINT wParam, UINT x, UINT y);
 void setShape(int);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPTSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPTSTR    lpCmdLine,
+	_In_ int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
+	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
 
@@ -56,7 +56,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	MyRegisterClass(hInstance);
 
 	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow))
+	if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
 	}
@@ -73,7 +73,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
-	return (int) msg.wParam;
+	return (int)msg.wParam;
 }
 
 
@@ -89,17 +89,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= WndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32PROJECT1));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_WIN32PROJECT1);
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32PROJECT1));
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_WIN32PROJECT1);
+	wcex.lpszClassName = szWindowClass;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassEx(&wcex);
 }
@@ -116,22 +116,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   HWND hWnd;
+	HWND hWnd;
 
-   hInst = hInstance; // Store instance handle in our global variable
+	hInst = hInstance; // Store instance handle in our global variable
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+	if (!hWnd)
+	{
+		return FALSE;
+	}
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
 
-   return TRUE;
+	return TRUE;
 }
 
 //
@@ -147,59 +147,62 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
-	int shape=0;
+	int shape = 0;
 	int command;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
 	switch (message)
 	{
+
 	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
+	{
+		wmId = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
 		// Parse the menu selections:
 		switch (wmId)
 		{
-			case IDM_ABOUT:
-				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-				break;
-			case IDM_EXIT:
-				DestroyWindow(hWnd);
-				break;
-			case ID_SHAPE_RECTANGLE:
-				setShape(1);
-				break;
-			case ID_SHAPE_ELLIPSE:
-				setShape(3); 
-				break;
-			case ID_SHAPE_TRIANGLE:
-				setShape(2); 
-				break;
-			default:
-				return DefWindowProc(hWnd, message, wParam, lParam);
-				break;
+		case IDM_ABOUT:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			break;
+		case IDM_EXIT:
+			DestroyWindow(hWnd);
+			break;
+		case ID_SHAPE_RECTANGLE:
+			setShape(1);
+			break;
+		case ID_SHAPE_ELLIPSE:
+			setShape(3);
+			break;
+		case ID_SHAPE_TRIANGLE:
+			setShape(2);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+			break;
 		}
+	}
+	break;
 	case WM_LBUTTONDOWN:
-		{
-			onLButtonDown(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
-		}
-		break;
+	{
+		onLButtonDown(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
+	}
+	break;
 	case WM_LBUTTONUP:
-		{
-			onLButtonUp(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
-		}
-		break;
+	{
+		onLButtonUp(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
+	}
+	break;
 	case WM_MOUSEMOVE:
-		{
-			onMouseMove(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
-		}
-		break;
+	{
+		onMouseMove(hWnd, (UINT)wParam, LOWORD(lParam), HIWORD(lParam));
+	}
+	break;
 	case WM_PAINT:
-		//hdc = ::BeginPaint(hWnd, &ps);
+	{
 		paint(hWnd);
-		// TODO: Add any drawing code here...
-		//::EndPaint(hWnd, &ps);
-		break;
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -221,107 +224,42 @@ void setCommand(int commandID)
 
 void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 {
+	startPt.x = x;
+	startPt.y = y;
+	currentPt.x = x;
+	currentPt.y = y;
 	if (shapeValue != -1)
 		insert_shape = true;
 	else
 	{
-
-	//some other command code here
+		//Code to select a shape
 	}
-
-	startPt.x = x;
-	startPt.y = y;
-	lButtonPress = true;
-	currentPt.x = x;
-	currentPt.y = y;
-	
-	draw(hWnd);
 	return;
 }
 
 void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 {
-	if (!lButtonPress)
+	if (insert_shape)
 	{
-		return;
+		RECT rect = { x, y, currentPt.x, currentPt.y };
+		InvalidateRect(hWndm, &rect, true); //Invalidate the last drawn shape
+		currentPt.x = x;
+		currentPt.y = y;
 	}
-	
-	//remove last shape
-	draw(hWndm);
-	currentPt.x = x;
-	currentPt.y = y;
-	//draw current shape
-	draw(hWndm);
-
+	else if (1/*condition for moving shape*/)
+	{
+		//code for moving shape
+	}
+	return;
 }
 
 void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 {
-	if (!lButtonPress)
+	if (shapeValue != -1)
 	{
-		return;
-	}
-	
-	draw(hWnd);
-	lButtonPress = false;
-	//SJ: This removes what we were displaying using the draw function
-	InvalidateRect(hWnd, NULL, TRUE);
-	//SJ: UpdateWindow functions triggers the WM_Paint message, which in turn calls the paint function
-	UpdateWindow(hWnd);
-}
-
-//SJ: Draw is a temporary functions This sort of gives a preview of what you are drawing,
-void draw(HWND hWnd)
-{
-	HDC hdc;
-	hdc = ::GetDC(hWnd);
-	//SJ: the following pair of functions are there to ensure that what we are drawing is not a filled object.
-	::SetROP2(hdc, R2_NOT);
-	::SelectObject(hdc, ::GetStockObject(NULL_BRUSH));
-	switch (shapeValue)
-	{
-		case 1:
+		file_maker::File cur_file;
+		switch (shapeValue)
 		{
-			::Rectangle(hdc, startPt.x, startPt.y, currentPt.x, currentPt.y);
-		}
-		break;
-		case 3:
-		{
-			::Ellipse(hdc, startPt.x, startPt.y, currentPt.x, currentPt.y);
-			
-		}
-		break;
-		case 2:
-		{
-			POINT P1, P2, P3;
-			P1.x = startPt.x + currentPt.x / 2;
-			P1.y = startPt.y;
-			P2.x = startPt.x;
-			P2.y = startPt.y + currentPt.y;
-			P3.x = startPt.x + currentPt.x;
-			P3.y = startPt.y + currentPt.y;
-			POINT vertices[] = {P1,P2,P3};
-			::Polygon(hdc, vertices, 3);	
-		}
-		break;
-		
-	}
-
-	::ReleaseDC(hWnd, hdc);
-}
-//SJ: Paint is what persists the shape on the screen
-//TODO: We need to store everything we paint in a structure. So, everytime we paint, we display every shape that's on the structure.
-//If we do that, the problem of the previous shape disappearing will be gone. 
-//I am leaving that now, because I think this will be related to the way we design our shape class
-void paint(HWND hWnd)
-{
-	PAINTSTRUCT ps;
-	HDC			hdc;
-	hdc = ::BeginPaint(hWnd, &ps);
-	file_maker::File cur_file;
-	switch (shapeValue)
-	{
-		//cout << shapeValue << endl;
 		case 1:
 		{
 			numOfShapes++;
@@ -344,17 +282,34 @@ void paint(HWND hWnd)
 			std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
 			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_triangle);
-			//alert(shape_triangle.get()->get_type_id());
 		}
 		break;
+		}
+		insert_shape = false;
+		shapeValue = -1;
+		InvalidateRect(hWnd, NULL, true);
 	}
-	//alert("Hey");
 
-	//vector<std::shared_ptr<Shape> *>::iterator it = cur_file.get_shape_list().begin();
-	//vector<std::shared_ptr<Shape> *>::iterator endIt = cur_file.get_shape_list().end();
-	
-	//alert(cur_file.get_shape_list()[0].get()->get_type_id());
-	for (int runner=0; runner < cur_file.get_shape_list().size();runner++)
+	if (1/*condition to test for move and implement code*/)
+	{
+		//code for implementing move
+	}
+	return;
+}
+
+
+//SJ: Paint is what persists the shape on the screen
+//TODO: We need to store everything we paint in a structure. So, everytime we paint, we display every shape that's on the structure.
+//If we do that, the problem of the previous shape disappearing will be gone. 
+//I am leaving that now, because I think this will be related to the way we design our shape class
+void paint(HWND hWnd)
+{
+	PAINTSTRUCT ps;
+	HDC			hdc;
+	hdc = BeginPaint(hWnd, &ps);
+	FilePainter painter(hWnd, hdc);
+	File cur_file;
+	for (int runner = 0; runner < cur_file.get_shape_list().size(); runner++)
 	{
 		std::shared_ptr<Shape> temp = cur_file.get_shape_list()[runner];
 		POINT TopLeft = { temp.get()->get_topleft_x(), temp.get()->get_topleft_y() };
@@ -363,27 +318,19 @@ void paint(HWND hWnd)
 		switch (temp.get()->get_type_id())
 		{
 		case 1:
-			::Rectangle(hdc, TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y);
+			painter.draw_rectangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
 			break;
 		case 3:
-			::Ellipse(hdc, TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y);
+			painter.draw_ellipse(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
 			break;
 		case 2:
 		{
-			POINT P1, P2, P3;
-			P1.x = TopLeft.x + BottomRight.x / 2;
-			P1.y = TopLeft.y;
-			P2.x = TopLeft.x;
-			P2.y = TopLeft.y + BottomRight.y;
-			P3.x = TopLeft.x + BottomRight.x;
-			P3.y = TopLeft.y + BottomRight.y;
-			POINT vertices[] = { P1, P2, P3 };
-			::Polygon(hdc, vertices, 3);
+			painter.draw_triangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
 		}
 		break;
 		}
 	}
-	
+
 	::EndPaint(hWnd, &ps);
 }
 // Message handler for about box.

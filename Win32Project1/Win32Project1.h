@@ -14,3 +14,4 @@
 #include "model\FillColor.h"
 #include "model\CommandFactory.h"
 #include "model\file.h"
+#include "FilePainter.h"
