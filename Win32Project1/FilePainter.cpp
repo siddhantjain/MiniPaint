@@ -23,12 +23,12 @@ void FilePainter::draw_ellipse(int tl_x, int tl_y, int br_x, int br_y, COLORREF 
 void FilePainter::draw_triangle(int tl_x, int tl_y, int br_x, int br_y, COLORREF c)
 {
 	POINT P1, P2, P3;
-	P1.x = tl_x + br_x / 2;
+	P1.x = (br_x + tl_x)/ 2;
 	P1.y = tl_y;
 	P2.x = tl_x;
-	P2.y = tl_y + br_y;
-	P3.x = tl_x + br_x;
-	P3.y = tl_y + br_y;
+	P2.y = br_y;
+	P3.x = br_x;
+	P3.y = br_y;
 	POINT vertices[] = { P1, P2, P3 };
 	::Polygon(hdc, vertices, 3);
 	//code for drawing a triangle
