@@ -134,6 +134,9 @@
     <ClCompile Include="shape_select.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UndoStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc">
