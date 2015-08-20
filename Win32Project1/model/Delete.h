@@ -10,7 +10,8 @@ namespace shape_maker
 		Delete();
 		//~Delete();
 		void execute(std::shared_ptr<Shape> shape);
-		void undo();
+		void undo(std::shared_ptr<Shape> shape);
+		void redo(std::shared_ptr<Shape> shape);
 	};
 }
 #endif

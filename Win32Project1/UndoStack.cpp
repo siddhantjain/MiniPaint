@@ -14,3 +14,4 @@ shape_maker::CommandPtr UndoStack:: pop_command()
 	else
 		return NULL;
 }
+std::stack<shape_maker::CommandPtr> UndoStack::undostack;

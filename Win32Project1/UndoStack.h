@@ -1,12 +1,14 @@
+#ifndef UNDOSTACK_H
+#define UNDOSTACK_H
 #include <iostream>
 #include <stack>
 #include "model\Command.h"
-class RedoStack;
 class UndoStack
 {
 private:
-	std::stack<shape_maker::CommandPtr> undostack;
+	static std::stack<shape_maker::CommandPtr> undostack;
 public:
-	void push_command(shape_maker::CommandPtr);
-	shape_maker::CommandPtr pop_command();
+	static void push_command(shape_maker::CommandPtr);
+	static shape_maker::CommandPtr pop_command();
 };
+#endif

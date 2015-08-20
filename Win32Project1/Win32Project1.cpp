@@ -8,6 +8,8 @@
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
+#include "UndoStack.h"
+#include "RedoStack.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -38,9 +40,6 @@ bool show_bounding_box = false;
 ShapeFactoryPtr shapeFactoryPtr(new ShapeFactory);
 CommandFactoryPtr commandFactoryPtr(new CommandFactory);
 COLORREF selected_color;
-void doFileSave(HWND);
-void doFileOpen(HWND);
-
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -54,6 +53,10 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y);
 void onMouseMove(HWND hWnd, UINT wParam, UINT x, UINT y);
 void setShape(int);
 void setCommand(int);
+void doFileSave(HWND);
+void doFileOpen(HWND);
+void doUndo(HWND);
+void doRedo(HWND);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPTSTR    lpCmdLine,
@@ -217,10 +220,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			setCommand(4);
 			break;
 		case ID_OPTIONS_REDO:
-			setCommand(5);
+			doRedo(hWnd);
 			break;
 		case ID_OPTIONS_UNDO:
-			setCommand(6);
+			doUndo(hWnd);
 			break;
 		case ID_FILE_SAVE:
 			doFileSave(hWnd);
@@ -346,6 +349,7 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 			std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
 			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_rect);
+			UndoStack::push_command(command_draw);
 		}
 		break;
 		case 3:
@@ -354,6 +358,7 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 			std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
 			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_ellipse);
+			UndoStack::push_command(command_draw);
 		}
 		break;
 		case 2:
@@ -362,6 +367,7 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 			std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
 			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_triangle);
+			UndoStack::push_command(command_draw);
 		}
 		break;
 		}
@@ -583,4 +589,26 @@ void doFileOpen(HWND hDlg)
 		InvalidateRect(hDlg, NULL, TRUE);
 		UpdateWindow(hDlg);
 	}
+}
+void doUndo(HWND hWnd)
+{
+	CommandPtr commandObject = UndoStack::pop_command();
+	vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
+	int index = shapeList.size() - 1;
+	shared_ptr<Shape> shapeObject = shapeList[index];
+	commandObject->undo(shapeObject);
+	RedoStack::push_command(commandObject);
+
+	InvalidateRect(hWnd,NULL,TRUE);
+	UpdateWindow(hWnd);
+}
+void doRedo(HWND hWnd)
+{
+	CommandPtr commandObject = RedoStack::pop_command();
+	vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
+	shared_ptr<Shape> shapeObject = shapeList[0];
+	commandObject->redo(shapeObject);
+	UndoStack::push_command(commandObject);
+	InvalidateRect(hWnd, NULL, TRUE);
+	UpdateWindow(hWnd);
 }

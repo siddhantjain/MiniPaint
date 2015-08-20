@@ -10,7 +10,11 @@ void Move::execute(std::shared_ptr<Shape> shape)
 {
 	cout << "Move executed" << endl;
 }
-void Move::undo()
+void Move::undo(std::shared_ptr<Shape> shape)
 {
 	cout << "Move undo" << endl;
+}
+void Move::redo(std::shared_ptr<Shape> shape)
+{
+
 }

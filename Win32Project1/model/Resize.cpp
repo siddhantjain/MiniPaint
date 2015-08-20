@@ -10,7 +10,11 @@ void Resize::execute(std::shared_ptr<Shape> shape)
 {
 	cout << "Resize executed" << endl;
 }
-void Resize::undo()
+void Resize::undo(std::shared_ptr<Shape> shape)
 {
 	cout << "Resize undo" << endl;
+}
+void Resize::redo(std::shared_ptr<Shape> shape)
+{
+
 }

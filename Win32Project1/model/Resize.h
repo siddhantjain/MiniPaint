@@ -9,7 +9,8 @@ namespace shape_maker
 		Resize();
 		//~Resize();
 		void execute(std::shared_ptr<Shape> s);
-		void undo();
+		void undo(std::shared_ptr<Shape> shape);
+		void redo(std::shared_ptr<Shape> shape);
 	};
 }
 #endif

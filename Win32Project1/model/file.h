@@ -18,11 +18,11 @@ namespace file_maker
 		~File()
 		{}
 		//static std::vector<std::shared_ptr<Shape>*> shape_list;
-		void add_shape(std::shared_ptr<Shape> new_shape);
-		void remove_shape(int shape_id);
-		void replace_shape(int shape_id, std::shared_ptr<Shape> new_shape);
+		static void add_shape(std::shared_ptr<Shape> new_shape);
+		static void remove_shape(int shape_id);
+		static void replace_shape(int shape_id, std::shared_ptr<Shape> new_shape);
 		std::shared_ptr<Shape> get_shape(int shape_id);
-		vector<std::shared_ptr<Shape>> get_shape_list();
+		static vector<std::shared_ptr<Shape>> get_shape_list();
 		static void remove_all();
 	};
 }
