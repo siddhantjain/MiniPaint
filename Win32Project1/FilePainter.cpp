@@ -10,18 +10,39 @@ FilePainter::FilePainter(HWND hwnd, HDC hDc)
 }
 void FilePainter::draw_rectangle(int tl_x, int tl_y, int br_x, int br_y, COLORREF c)
 {
+	if (c != -1)
+	{
+		HPEN dashed_pen = CreatePen(PS_DASHDOTDOT, 1, RGB(0, 0, 0));
+		HBRUSH hCustomBrush = CreateSolidBrush(c);
+		SelectObject(hdc, dashed_pen);
+		SelectObject(hdc, hCustomBrush);
+	}
 	::Rectangle(hdc, tl_x, tl_y, br_x, br_y);
 	//code for drawing a rectangle
 }
 
 void FilePainter::draw_ellipse(int tl_x, int tl_y, int br_x, int br_y, COLORREF c)
 {
+	if (c != -1)
+	{
+		HPEN dashed_pen = CreatePen(PS_DASHDOTDOT, 1, RGB(0, 0, 0));
+		HBRUSH hCustomBrush = CreateSolidBrush(c);
+		SelectObject(hdc, dashed_pen);
+		SelectObject(hdc, hCustomBrush);
+	}
 	::Ellipse(hdc, tl_x, tl_y, br_x, br_y);
 	//code for drawing an ellipse
 }
 
 void FilePainter::draw_triangle(int tl_x, int tl_y, int br_x, int br_y, COLORREF c)
 {
+	if (c != -1)
+	{
+		HPEN dashed_pen = CreatePen(PS_DASHDOTDOT, 1, RGB(0, 0, 0));
+		HBRUSH hCustomBrush = CreateSolidBrush(c);
+		SelectObject(hdc, dashed_pen);
+		SelectObject(hdc, hCustomBrush);
+	}
 	POINT P1, P2, P3;
 	P1.x = (br_x + tl_x)/ 2;
 	P1.y = tl_y;

@@ -32,8 +32,10 @@ namespace shape_maker
 		int get_bottomright_x();
 		int get_bottomright_y();
 		int get_color();
+		void set_color();
 
 		void set_shape_id(int id);
+		void set_color(COLORREF in_color);
 		void set_properties(int &topleft_x, int &topleft_y, int &bottomright_x, int &bottomright_y, int const &color);
 	};
 }
