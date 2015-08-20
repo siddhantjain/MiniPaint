@@ -1,4 +1,5 @@
 #include "Command.h"
+#include "file.h"
 #ifndef FILLCOLOR_H
 #define FILLCOLOR_H
 namespace shape_maker

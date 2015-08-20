@@ -15,6 +15,7 @@
 using namespace shape_maker;
 using namespace file_maker;
 
+
 using namespace std;
 using namespace rapidxml;
 #define MAX_LOADSTRING 100
@@ -36,6 +37,7 @@ bool insert_shape = false;
 bool show_bounding_box = false;
 ShapeFactoryPtr shapeFactoryPtr(new ShapeFactory);
 CommandFactoryPtr commandFactoryPtr(new CommandFactory);
+COLORREF selected_color;
 void doFileSave(HWND);
 void doFileOpen(HWND);
 
@@ -51,6 +53,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y);
 void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y);
 void onMouseMove(HWND hWnd, UINT wParam, UINT x, UINT y);
 void setShape(int);
+void setCommand(int);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPTSTR    lpCmdLine,
@@ -190,12 +193,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case ID_SHAPE_TRIANGLE:
 			setShape(2);
 			break;
-		case ID_FILE_SAVE:
-			doFileSave(hWnd);
+		case ID_OPTIONS_DELETE:
+			setCommand(1);
 			break;
-		case ID_FILE_OPEN:
-			doFileOpen(hWnd);
+		case ID_OPTIONS_FILL:
+			static COLORREF arr_colors[16];
+			CHOOSECOLOR lpcc;
+			ZeroMemory(&lpcc, sizeof(lpcc));
+			lpcc.lStructSize = sizeof(CHOOSECOLOR);
+			lpcc.hwndOwner = NULL;
+			lpcc.lpCustColors = arr_colors;
+			lpcc.Flags = CC_FULLOPEN;
+			if (ChooseColor(&lpcc))
+			{
+				selected_color = lpcc.rgbResult;
+			}
+			setCommand(2);
 			break;
+		case ID_OPTIONS_MOVE:
+			setCommand(3);
+			break;
+		case ID_OPTIONS_RESIZE:
+			setCommand(4);
+			break;
+		case ID_OPTIONS_REDO:
+			setCommand(5);
+			break;
+		case ID_OPTIONS_UNDO:
+			setCommand(6);
+			break;
+			
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;
@@ -247,6 +274,9 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 	startPt.y = y;
 	currentPt.x = x;
 	currentPt.y = y;
+
+	File lButtonFile;
+	vector<shared_ptr<Shape>> list_of_shapes = lButtonFile.get_shape_list();
 	if (shapeValue != -1)
 		insert_shape = true;
 	else
@@ -256,6 +286,28 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 		current_selected_shape_id = shape_selector.which_shape(x, y);
 		InvalidateRect(hWnd, NULL, true);
 		show_bounding_box = true;
+		InvalidateRect(hWnd, NULL, true);
+		if (current_selected_shape_id > 0)
+		{
+			switch (commandValue)
+			{
+				case 1:
+				{
+					lButtonFile.remove_shape(current_selected_shape_id);
+				}
+				break;
+				case 2:
+				{
+					shared_ptr<Shape> new_shape;
+					shared_ptr<Shape> old_shape = lButtonFile.get_shape(current_selected_shape_id);
+					new_shape = old_shape;
+					new_shape->set_color(selected_color);
+					CommandPtr command_fill(commandFactoryPtr->getCommandObject(2));
+					command_fill->execute(new_shape);
+										//lButtonFile.replace_shape
+				}
+			}
+		}
 	}
 	return;
 }
@@ -337,18 +389,19 @@ void paint(HWND hWnd)
 		std::shared_ptr<Shape> temp = cur_file.get_shape_list()[runner];
 		POINT TopLeft = { temp.get()->get_topleft_x(), temp.get()->get_topleft_y() };
 		POINT BottomRight = { temp.get()->get_bottomright_x(), temp.get()->get_bottomright_y() };
+		COLORREF shape_color = temp.get()->get_color();
 		//alert(sizeof((*temp)));
 		switch (temp.get()->get_type_id())
 		{
 		case 1:
-			painter.draw_rectangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
+			painter.draw_rectangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, shape_color);
 			break;
 		case 3:
-			painter.draw_ellipse(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
+			painter.draw_ellipse(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, shape_color);
 			break;
 		case 2:
 		{
-			painter.draw_triangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, 0);
+			painter.draw_triangle(TopLeft.x, TopLeft.y, BottomRight.x, BottomRight.y, shape_color);
 		}
 		break;
 		}

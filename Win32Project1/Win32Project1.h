@@ -1,7 +1,8 @@
 #pragma once
 
 #include "resource.h"
-#include  "stdafx.h"
+#include "stdafx.h"
+#include "commdlg.h"
 #include "model\Shape.h"
 #include "model\Rectangle.h"
 #include "model\Triangle.h"

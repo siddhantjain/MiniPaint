@@ -28,7 +28,7 @@ void File::remove_shape(int shape_id)
 	
 	if (it==endIt)
 	{
-		cout << "ERROR: shape to be removed doesn't exist";
+		alert("ERROR: shape to be removed doesn't exist");
 		return;
 	}
 	it = shape_list.erase(it);
@@ -41,15 +41,17 @@ void File::replace_shape(int shape_id, std::shared_ptr<Shape> new_shape)
 
 	for (; it != endIt; ++it)
 	{
-		if ((*it).get()->get_shape_id() == shape_id)
-			shape_list.insert(it, new_shape);
+		if (it->get()->get_shape_id() == shape_id)
+			break;
+			
 	}
 
 	if (it == endIt)
 	{
-		cout << "ERROR: shape to be replaced doesn't exist";
+		alert("ERROR: shape to be replaced doesn't exist");
 		return;
 	}
+	it = shape_list.insert(it, new_shape);
 }
 std::shared_ptr<Shape> File::get_shape(int shape_id)
 {
