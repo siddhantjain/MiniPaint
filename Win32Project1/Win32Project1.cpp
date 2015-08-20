@@ -4,12 +4,22 @@
 #include "stdafx.h"
 #include "Win32Project1.h"
 #include "Resource.h"
+#include "Commdlg.h"
+#include "rapidxml.hpp"
+#include "rapidxml_print.hpp"
+#include "rapidxml_utils.hpp"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 using namespace shape_maker;
 using namespace file_maker;
 
 
 using namespace std;
+using namespace rapidxml;
 #define MAX_LOADSTRING 100
+#define BUFFER_SIZE 32
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -28,6 +38,8 @@ bool show_bounding_box = false;
 ShapeFactoryPtr shapeFactoryPtr(new ShapeFactory);
 CommandFactoryPtr commandFactoryPtr(new CommandFactory);
 COLORREF selected_color;
+void doFileSave(HWND);
+void doFileOpen(HWND);
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -124,8 +136,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	hInst = hInstance; // Store instance handle in our global variable
 
-	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+		CW_USEDEFAULT, 0, 900, 600, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
 	{
@@ -418,4 +430,152 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+void doFileSave(HWND hDlg)
+{
+	TCHAR   szFile[MAX_PATH] = TEXT("\0");
+	OPENFILENAME   ofn;
+
+	memset(&(ofn), 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+
+	ofn.hwndOwner = hDlg;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrFilter = TEXT("ShapeMaker (*.sm)\0*.xml\0");
+	ofn.lpstrTitle = TEXT("Save File As");
+	ofn.Flags = OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = TEXT("xml");
+
+	if (GetSaveFileName(&ofn))
+	{
+		xml_document<> doc;
+		xml_node<>* decl = doc.allocate_node(node_declaration);
+		decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+		decl->append_attribute(doc.allocate_attribute("encoding", "utf-8"));
+		doc.append_node(decl);
+
+		xml_node<>* root = doc.allocate_node(node_element, "Shapes");
+		root->append_attribute(doc.allocate_attribute("version", "1.0"));
+		root->append_attribute(doc.allocate_attribute("type", "records"));
+		doc.append_node(root);
+
+		File currFile;
+		//char id[33], topleftX[33], topLeftY[33], bottomRightX[33], bottomRightY[33];
+		char *attr_value;
+		int number_of_items = currFile.get_shape_list().size();
+		for (int runner = 0; runner < number_of_items; runner++)
+		{
+			std::shared_ptr<Shape> shapeObject = currFile.get_shape_list()[runner];
+			POINT TopLeft = { shapeObject.get()->get_topleft_x(), shapeObject.get()->get_topleft_y() };
+			POINT BottomRight = { shapeObject.get()->get_bottomright_x(), shapeObject.get()->get_bottomright_y() };
+			int shapeID = shapeObject->get_shape_id();
+			int shape_type_id = shapeObject->get_type_id();
+			int color = shapeObject->get_color();
+			xml_node<> *child = doc.allocate_node(node_element, "Shape");
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", shapeID);
+			child->append_attribute(doc.allocate_attribute("id", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", shape_type_id);
+			child->append_attribute(doc.allocate_attribute("type", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", TopLeft.x);
+			child->append_attribute(doc.allocate_attribute("topLeftX", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", TopLeft.y);
+			child->append_attribute(doc.allocate_attribute("topLeftY", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", BottomRight.x);
+			child->append_attribute(doc.allocate_attribute("bottomRightX", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", BottomRight.y);
+			child->append_attribute(doc.allocate_attribute("bottomRightY", attr_value));
+
+			attr_value = new char[BUFFER_SIZE];
+			sprintf_s(attr_value, BUFFER_SIZE, "%d", color);
+			child->append_attribute(doc.allocate_attribute("color", attr_value));
+
+			root->append_node(child);
+		}
+
+		//storing the filename
+		char *fileName;
+		size_t outputSize = wcslen(ofn.lpstrFile) + 1;
+		fileName = new char[outputSize];
+		size_t charsConverted = 0;
+		wcstombs_s(&charsConverted, fileName, outputSize, ofn.lpstrFile, outputSize);
+
+		//save the file
+		std::ofstream file_stored(fileName);
+		file_stored << doc;
+		file_stored.close();
+		doc.clear();
+
+	}
+}
+
+void doFileOpen(HWND hDlg)
+{
+	TCHAR   szFile[MAX_PATH] = TEXT("\0");
+	OPENFILENAME   ofn1;
+
+	memset(&(ofn1), 0, sizeof(ofn1));
+	ofn1.lStructSize = sizeof(ofn1);
+
+	ofn1.hwndOwner = hDlg;
+	ofn1.lpstrFile = szFile;
+	ofn1.nMaxFile = MAX_PATH;
+	ofn1.lpstrFilter = TEXT("ShapeMaker (*.sm)\0*.xml\0");
+	ofn1.lpstrTitle = TEXT("Save File As");
+	ofn1.Flags = OFN_HIDEREADONLY;
+	ofn1.lpstrDefExt = TEXT("xml");
+
+	if (GetOpenFileName(&ofn1))
+	{
+		//renoving all the present objects from shapeList
+		File::remove_all();
+
+		//storing the filename
+		char *fileName;
+		size_t outputSize = wcslen(ofn1.lpstrFile) + 1;
+		fileName = new char[outputSize];
+		size_t charsConverted = 0;
+		wcstombs_s(&charsConverted, fileName, outputSize, ofn1.lpstrFile, outputSize);
+
+		// Read xml file =================================
+		xml_document<> doc;
+		std::ifstream file(fileName);
+
+		std::stringstream buff;
+		buff << file.rdbuf();
+		std::string content(buff.str());
+		doc.parse<0>(&content[0]);
+
+		xml_node<>*root_node = doc.first_node("Shapes");
+		numOfShapes = 0;
+		for (xml_node<>* shapeNode = root_node->first_node("Shape"); shapeNode; shapeNode = shapeNode->next_sibling())
+		{
+			int shape_id = atoi(shapeNode->first_attribute("id")->value());
+			int shape_type_id = atoi(shapeNode->first_attribute("type")->value());
+			int topleft_x = atoi(shapeNode->first_attribute("topLeftX")->value());
+			int topleft_y = atoi(shapeNode->first_attribute("topLeftY")->value());
+			int bottomright_x = atoi(shapeNode->first_attribute("bottomRightX")->value());
+			int bottomright_y = atoi(shapeNode->first_attribute("bottomRightY")->value());
+			int color = atoi(shapeNode->first_attribute("color")->value());
+			std::shared_ptr<Shape> shape(shapeFactoryPtr->getShapeObject(shape_type_id, numOfShapes, topleft_x, topleft_y, bottomright_x, bottomright_y, color));
+			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
+			command_draw->execute(shape);
+			numOfShapes++;
+		}
+		InvalidateRect(hDlg, NULL, TRUE);
+		UpdateWindow(hDlg);
+	}
 }
