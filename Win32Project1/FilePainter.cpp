@@ -33,3 +33,16 @@ void FilePainter::draw_triangle(int tl_x, int tl_y, int br_x, int br_y, COLORREF
 	::Polygon(hdc, vertices, 3);
 	//code for drawing a triangle
 }
+
+void FilePainter::show_bounding_box(int selected_shape_id)
+{
+	file_maker::File temp_file;
+	shared_ptr<Shape> temp_shape = temp_file.get_shape(selected_shape_id);
+	if (temp_shape != NULL)
+	{
+		HPEN dashed_pen = CreatePen(PS_DASH, 10 , RGB(0,0,0));
+		SelectObject(hdc, dashed_pen);
+		SelectObject(hdc, ::GetStockObject(NULL_BRUSH));
+		::Rectangle(hdc, temp_shape->get_topleft_x(), temp_shape->get_topleft_y(), temp_shape->get_bottomright_x(), temp_shape->get_bottomright_y());
+	}
+}

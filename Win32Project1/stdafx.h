@@ -17,7 +17,10 @@
 #include <memory.h>
 #include <tchar.h>
 
-
+//CONSTANTS
+#define RECTANGLE 1
+#define CIRCLE 2
+#define TRIANGLE 3
 // TODO: reference additional headers your program requires here
 #include <iostream>
 #include <vector>

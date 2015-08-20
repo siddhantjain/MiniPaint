@@ -18,10 +18,12 @@ int shapeValue = -1;										//SJ: remove this global variable
 int commandValue = -1;									//SJ: remove these global variables
 int numOfShapes = 0;									//SJ:This limits the number of total number of shapes to range of int.
 int cur_color = 0;
+int current_selected_shape_id = 0;
 POINT startPt;
 POINT currentPt;
 bool lButtonPress = false;
 bool insert_shape = false;
+bool show_bounding_box = false;
 ShapeFactoryPtr shapeFactoryPtr(new ShapeFactory);
 CommandFactoryPtr commandFactoryPtr(new CommandFactory);
 
@@ -232,7 +234,11 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 		insert_shape = true;
 	else
 	{
-		//Code to select a shape
+		//Code to decide on which shape is selected
+		shape_select shape_selector;
+		current_selected_shape_id = shape_selector.which_shape(x, y);
+		InvalidateRect(hWnd, NULL, true);
+		show_bounding_box = true;
 	}
 	return;
 }
@@ -330,7 +336,10 @@ void paint(HWND hWnd)
 		break;
 		}
 	}
-
+	if (show_bounding_box)
+	{
+		painter.show_bounding_box(current_selected_shape_id);
+	}
 	::EndPaint(hWnd, &ps);
 }
 // Message handler for about box.

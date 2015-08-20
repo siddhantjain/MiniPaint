@@ -58,16 +58,16 @@ std::shared_ptr<Shape> File::get_shape(int shape_id)
 
 	for (; it != endIt; ++it)
 	{
-		if ((*it).get()->get_shape_id() == shape_id)
-			return (*it);
+		if (it->get()->get_shape_id() == shape_id)
+			return *(it);
 	}
 	if (it == endIt)
 	{
-		cout << "ERROR: shape to be returned doesn't exist";
+		//alert( "ERROR: shape to be returned doesn't exist");
 		return NULL;
 	}
 	else
-		return (*it);
+		return *(it);
 }
 
 vector<std::shared_ptr<Shape>> File::get_shape_list()

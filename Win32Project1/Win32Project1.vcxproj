@@ -94,6 +94,7 @@
     <ClInclude Include="model\ShapeFactory.h" />
     <ClInclude Include="model\Triangle.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="shape_select.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Win32Project1.h" />
   </ItemGroup>
@@ -110,6 +111,7 @@
     <ClCompile Include="model\Shape.cpp" />
     <ClCompile Include="model\ShapeMaker.cpp" />
     <ClCompile Include="model\Triangle.cpp" />
+    <ClCompile Include="shape_select.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

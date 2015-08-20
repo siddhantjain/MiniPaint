@@ -69,6 +69,9 @@
     <ClInclude Include="FilePainter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shape_select.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -111,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilePainter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shape_select.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

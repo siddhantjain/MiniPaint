@@ -15,3 +15,4 @@
 #include "model\CommandFactory.h"
 #include "model\file.h"
 #include "FilePainter.h"
+#include "shape_select.h"
