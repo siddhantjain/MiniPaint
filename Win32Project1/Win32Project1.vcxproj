@@ -97,6 +97,7 @@
     <ClInclude Include="rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
+    <ClInclude Include="RedoStack.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="shape_select.h" />
     <ClInclude Include="stdafx.h" />
@@ -116,6 +117,7 @@
     <ClCompile Include="model\Shape.cpp" />
     <ClCompile Include="model\ShapeMaker.cpp" />
     <ClCompile Include="model\Triangle.cpp" />
+    <ClCompile Include="RedoStack.cpp" />
     <ClCompile Include="shape_select.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

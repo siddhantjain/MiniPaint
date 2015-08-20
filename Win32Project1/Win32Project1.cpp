@@ -222,7 +222,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case ID_OPTIONS_UNDO:
 			setCommand(6);
 			break;
-			
+		case ID_FILE_SAVE:
+			doFileSave(hWnd);
+			break;
+		case ID_FILE_OPEN:
+			doFileOpen(hWnd);
+			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;

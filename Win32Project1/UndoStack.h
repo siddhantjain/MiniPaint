@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stack>
 #include "model\Command.h"
+class RedoStack;
 class UndoStack
 {
 private:

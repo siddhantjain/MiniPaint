@@ -9,6 +9,7 @@ shape_maker::CommandPtr UndoStack:: pop_command()
 	{
 		shape_maker::CommandPtr commandObject = undostack.top();
 		undostack.pop();
+		return commandObject;
 	}
 	else
 		return NULL;

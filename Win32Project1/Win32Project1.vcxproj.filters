@@ -87,6 +87,9 @@
     <ClInclude Include="UndoStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RedoStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -135,6 +138,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UndoStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RedoStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
