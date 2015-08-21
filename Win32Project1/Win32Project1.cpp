@@ -300,8 +300,11 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 			switch (commandValue)
 			{
 				case 1:
-				{
-					lButtonFile.remove_shape(current_selected_shape_id);
+				{	//removing a command
+					CommandPtr command_remove(commandFactoryPtr->getCommandObject(4));
+					command_remove->execute(lButtonFile.get_shape(current_selected_shape_id));
+					UndoStack::push_command(command_remove);
+					
 				}
 				break;
 				case 2:
@@ -312,7 +315,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 					new_shape->set_color(selected_color);
 					CommandPtr command_fill(commandFactoryPtr->getCommandObject(2));
 					command_fill->execute(new_shape);
-										//lButtonFile.replace_shape
+					UndoStack::push_command(command_fill);
 				}
 			}
 		}
