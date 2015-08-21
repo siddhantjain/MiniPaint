@@ -411,7 +411,7 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 
 		new_shape->set_shape_id(old_shape->get_shape_id());
 		new_shape->set_shape_type_id(old_shape->get_type_id());
-		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, old_shape->get_color());
 
 		command_move->execute(new_shape);
 		UndoStack::push_command(command_move);
@@ -442,7 +442,7 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 
 		new_shape->set_shape_id(old_shape->get_shape_id());
 		new_shape->set_shape_type_id(old_shape->get_type_id());
-		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, old_shape->get_color());
 		
 		command_move->execute(new_shape);
 
