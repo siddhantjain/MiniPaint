@@ -15,10 +15,13 @@ void Resize::execute(std::shared_ptr<Shape> shape)
 void Resize::undo(std::shared_ptr<Shape> shape)
 {
 	cout << "Resize undo" << endl;
+	file_maker::File::replace_shape(shape->get_shape_id(), oldShape);
+	setoldShape(shape);
 }
 void Resize::redo(std::shared_ptr<Shape> shape)
 {
-
+	file_maker::File::replace_shape(shape->get_shape_id(), oldShape);
+	setoldShape(shape);
 }
 void Resize::setoldShape(std::shared_ptr<Shape> old_shape)
 {

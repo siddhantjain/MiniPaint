@@ -396,19 +396,26 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 			alert("No shape selected to move");
 			return;
 		}
-		std::shared_ptr<Shape> new_shape;
-		new_shape = cur_file.get_shape(current_selected_shape_id);
+		std::shared_ptr<Shape> new_shape(new Shape());
+		std::shared_ptr<Shape> old_shape= cur_file.get_shape(current_selected_shape_id);
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
+		command_move->setoldShape(old_shape);
+
 		int change_in_x = currentPt.x - startPt.x;
 		int change_in_y = currentPt.y - startPt.y;
-		int tl_x_new = new_shape->get_topleft_x();
-		int tl_y_new = new_shape->get_topleft_y();
-		int br_x_new = new_shape->get_bottomright_x();
-		int br_y_new = new_shape->get_bottomright_y();
+		int tl_x_new = old_shape->get_topleft_x();
+		int tl_y_new = old_shape->get_topleft_y();
+		int br_x_new = old_shape->get_bottomright_x();
+		int br_y_new = old_shape->get_bottomright_y();
 		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 1);
+
+		new_shape->set_shape_id(old_shape->get_shape_id());
+		new_shape->set_shape_type_id(old_shape->get_type_id());
 		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
-		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
+
 		command_move->execute(new_shape);
 		UndoStack::push_command(command_move);
+
 		InvalidateRect(hWnd, NULL, true);
 	}
 	if (commandValue == 4)
@@ -419,18 +426,26 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 			alert("No shape selected to resize");
 			return;
 		}
-		std::shared_ptr<Shape> new_shape;
-		new_shape = cur_file.get_shape(current_selected_shape_id);
+		std::shared_ptr<Shape> new_shape(new Shape());
+		std::shared_ptr<Shape> old_shape = cur_file.get_shape(current_selected_shape_id);
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(3));
+
+		command_move->setoldShape(old_shape);
+
 		int change_in_x = currentPt.x - startPt.x;
 		int change_in_y = currentPt.y - startPt.y;
-		int tl_x_new = new_shape->get_topleft_x();
-		int tl_y_new = new_shape->get_topleft_y();
-		int br_x_new = new_shape->get_bottomright_x();
-		int br_y_new = new_shape->get_bottomright_y();
+		int tl_x_new = old_shape->get_topleft_x();
+		int tl_y_new = old_shape->get_topleft_y();
+		int br_x_new = old_shape->get_bottomright_x();
+		int br_y_new = old_shape->get_bottomright_y();
 		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 2);
+
+		new_shape->set_shape_id(old_shape->get_shape_id());
+		new_shape->set_shape_type_id(old_shape->get_type_id());
 		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
-		CommandPtr command_move(commandFactoryPtr->getCommandObject(3));
+		
 		command_move->execute(new_shape);
+
 		UndoStack::push_command(command_move);
 		InvalidateRect(hWnd, NULL, true);
 	}
@@ -693,14 +708,27 @@ void doUndo(HWND hWnd)
 void doRedo(HWND hWnd)
 {
 	CommandPtr commandObject = RedoStack::pop_command();
-	vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
+	/*vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
 	int index = File::get_shape_list().size() - 1;
 	shared_ptr<Shape> shapeObject;
 	if (index > -1)
 		shapeObject= shapeList[index];
 	else
 		shapeObject = NULL;
-	commandObject->redo(shapeObject);
+	commandObject->redo(shapeObject);*/
+	shared_ptr<Shape> shapeObject = commandObject->getoldShape();
+	File cur_file;
+	if (shapeObject != NULL)
+	{
+		int index = shapeObject->get_shape_id();
+		shared_ptr<Shape> newShape = cur_file.get_shape(index);
+		commandObject->redo(newShape);
+	}
+	else
+	{
+		int index = File::get_shape_list().size() - 1;
+		commandObject->redo(File::get_shape_list()[index]);
+	}
 	UndoStack::push_command(commandObject);
 	InvalidateRect(hWnd, NULL, TRUE);
 	UpdateWindow(hWnd);
