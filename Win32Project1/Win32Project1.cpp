@@ -57,6 +57,7 @@ void doFileSave(HWND);
 void doFileOpen(HWND);
 void doUndo(HWND);
 void doRedo(HWND);
+void get_shifted_corners(int* tl_x_new, int* tl_y_new, int* br_x_new, int* br_y_new, int change_in_x, int change_in_y, int mode);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPTSTR    lpCmdLine,
@@ -383,15 +384,21 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 	if (commandValue==3)
 	{ //move
 		commandValue = -1;
+		if (current_selected_shape_id == -1)
+		{
+			alert("No shape selected to move");
+			return;
+		}
 		std::shared_ptr<Shape> new_shape;
 		new_shape = cur_file.get_shape(current_selected_shape_id);
 		int change_in_x = currentPt.x - startPt.x;
 		int change_in_y = currentPt.y - startPt.y;
-		int new_tl_x = new_shape->get_topleft_x() + change_in_x;
-		int new_tl_y = new_shape->get_topleft_y() + change_in_y;
-		int new_br_x = new_shape->get_bottomright_x() + change_in_x;
-		int new_br_y = new_shape->get_bottomright_y() + change_in_y;
-		new_shape->set_properties(new_tl_x, new_tl_y, new_br_x, new_br_y, new_shape->get_color());
+		int tl_x_new = new_shape->get_topleft_x();
+		int tl_y_new = new_shape->get_topleft_y();
+		int br_x_new = new_shape->get_bottomright_x();
+		int br_y_new = new_shape->get_bottomright_y();
+		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 1);
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
 		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
 		command_move->execute(new_shape);
 		UndoStack::push_command(command_move);
@@ -400,15 +407,21 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 	if (commandValue == 4)
 	{
 		commandValue = -1;
+		if (current_selected_shape_id == -1)
+		{
+			alert("No shape selected to resize");
+			return;
+		}
 		std::shared_ptr<Shape> new_shape;
 		new_shape = cur_file.get_shape(current_selected_shape_id);
 		int change_in_x = currentPt.x - startPt.x;
 		int change_in_y = currentPt.y - startPt.y;
-		int tl_x = new_shape->get_topleft_x();
-		int tl_y = new_shape->get_topleft_y();
-		int new_br_x = new_shape->get_bottomright_x() + change_in_x;
-		int new_br_y = new_shape->get_bottomright_y() + change_in_y;
-		new_shape->set_properties(tl_x, tl_y, new_br_x, new_br_y, new_shape->get_color());
+		int tl_x_new = new_shape->get_topleft_x();
+		int tl_y_new = new_shape->get_topleft_y();
+		int br_x_new = new_shape->get_bottomright_x();
+		int br_y_new = new_shape->get_bottomright_y();
+		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 2);
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
 		CommandPtr command_move(commandFactoryPtr->getCommandObject(3));
 		command_move->execute(new_shape);
 		UndoStack::push_command(command_move);
@@ -417,7 +430,31 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 	return;
 }
 
+void get_shifted_corners(int* tl_x_new, int* tl_y_new, int* br_x_new, int* br_y_new, int change_in_x, int change_in_y, int mode)
+{
+	//move mode
+	if (mode == 1)
+	{
+		*tl_x_new = *tl_x_new + change_in_x;
+		*tl_y_new = *tl_y_new + change_in_y;
+		*br_x_new = *br_x_new + change_in_x;
+		*br_y_new = *br_y_new + change_in_y;
+	}
+	//resize mode
+	else  if (mode == 2)
+	{
+		if ((change_in_x * change_in_y) > 0)
+		{
+			*br_x_new += change_in_x;
+			*br_y_new += change_in_y;
+		}
+		else 
+		{
+			alert("Resize only from bottom right point");
+		}
+	}
 
+}
 //SJ: Paint is what persists the shape on the screen
 //TODO: We need to store everything we paint in a structure. So, everytime we paint, we display every shape that's on the structure.
 //If we do that, the problem of the previous shape disappearing will be gone. 
