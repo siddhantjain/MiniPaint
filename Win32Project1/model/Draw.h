@@ -12,6 +12,8 @@ namespace shape_maker
 		void execute(std::shared_ptr<Shape> shape);
 		void undo(std::shared_ptr<Shape> shape);
 		void redo(std::shared_ptr<Shape> shape);
+		void setoldShape(std::shared_ptr<Shape> oldShape);
+		std::shared_ptr<Shape> getoldShape();
 	};
 }
 

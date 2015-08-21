@@ -19,3 +19,11 @@ void Delete::redo(std::shared_ptr<Shape> shape)
 {
 
 }
+void Delete::setoldShape(std::shared_ptr<Shape> old_shape)
+{
+	oldShape = old_shape;
+}
+std::shared_ptr<Shape> Delete::getoldShape()
+{
+	return oldShape;
+}

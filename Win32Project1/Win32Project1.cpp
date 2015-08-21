@@ -306,12 +306,20 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 				break;
 				case 2:
 				{
-					shared_ptr<Shape> new_shape;
+					shared_ptr<Shape> new_shape(new Shape());
 					shared_ptr<Shape> old_shape = lButtonFile.get_shape(current_selected_shape_id);
-					new_shape = old_shape;
-					new_shape->set_color(selected_color);
 					CommandPtr command_fill(commandFactoryPtr->getCommandObject(2));
+					command_fill->setoldShape(old_shape);
+					new_shape->set_shape_id(old_shape->get_shape_id());
+					new_shape->set_shape_type_id(old_shape->get_type_id());
+					int lefttopx = old_shape->get_topleft_x();
+					int lefttopy = old_shape->get_topleft_y();
+					int bottomrightx = old_shape->get_bottomright_x();
+					int bottomrighty = old_shape->get_bottomright_y();
+					new_shape->set_properties(lefttopx, lefttopy, bottomrightx, bottomrighty, selected_color);
+
 					command_fill->execute(new_shape);
+					UndoStack::push_command(command_fill);
 										//lButtonFile.replace_shape
 				}
 			}
@@ -395,7 +403,8 @@ void paint(HWND hWnd)
 	hdc = BeginPaint(hWnd, &ps);
 	FilePainter painter(hWnd, hdc);
 	File cur_file;
-	for (int runner = 0; runner < cur_file.get_shape_list().size(); runner++)
+	vector<shared_ptr<Shape>> shapeList = cur_file.get_shape_list();
+	for (int runner = 0; runner < shapeList.size(); runner++)
 	{
 		std::shared_ptr<Shape> temp = cur_file.get_shape_list()[runner];
 		POINT TopLeft = { temp.get()->get_topleft_x(), temp.get()->get_topleft_y() };
@@ -593,10 +602,19 @@ void doFileOpen(HWND hDlg)
 void doUndo(HWND hWnd)
 {
 	CommandPtr commandObject = UndoStack::pop_command();
-	vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
-	int index = shapeList.size() - 1;
-	shared_ptr<Shape> shapeObject = shapeList[index];
-	commandObject->undo(shapeObject);
+	shared_ptr<Shape> shapeObject = commandObject->getoldShape();
+	File cur_file;
+	if (shapeObject!=NULL)
+	{
+		int index = shapeObject->get_shape_id();
+		shared_ptr<Shape> newShape = cur_file.get_shape(index);
+		commandObject->undo(newShape);
+	}
+	else
+	{
+		int index = File::get_shape_list().size() - 1;
+		commandObject->undo(File::get_shape_list()[index]);
+	}
 	RedoStack::push_command(commandObject);
 
 	InvalidateRect(hWnd,NULL,TRUE);
@@ -606,7 +624,12 @@ void doRedo(HWND hWnd)
 {
 	CommandPtr commandObject = RedoStack::pop_command();
 	vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
-	shared_ptr<Shape> shapeObject = shapeList[0];
+	int index = File::get_shape_list().size() - 1;
+	shared_ptr<Shape> shapeObject;
+	if (index > -1)
+		shapeObject= shapeList[index];
+	else
+		shapeObject = NULL;
 	commandObject->redo(shapeObject);
 	UndoStack::push_command(commandObject);
 	InvalidateRect(hWnd, NULL, TRUE);

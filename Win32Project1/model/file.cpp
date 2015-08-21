@@ -36,7 +36,7 @@ void File::remove_shape(int shape_id)
 
 void File::replace_shape(int shape_id, std::shared_ptr<Shape> new_shape)
 {
-	vector<std::shared_ptr<Shape>>::iterator it = shape_list.begin();
+	/*vector<std::shared_ptr<Shape>>::iterator it = shape_list.begin();
 	vector<std::shared_ptr<Shape>>::iterator endIt = shape_list.end();
 
 	for (; it != endIt; ++it)
@@ -51,7 +51,16 @@ void File::replace_shape(int shape_id, std::shared_ptr<Shape> new_shape)
 		alert("ERROR: shape to be replaced doesn't exist");
 		return;
 	}
-	it = shape_list.insert(it, new_shape);
+	it = shape_list.insert(it, new_shape);*/
+	int number_of_elements = shape_list.size();
+	for (int i = 0; i < number_of_elements; i++)
+	{
+		if (shape_list[i]->get_shape_id() == shape_id)
+		{
+			shape_list[i] = new_shape;
+			break;
+		}
+	}
 }
 std::shared_ptr<Shape> File::get_shape(int shape_id)
 {

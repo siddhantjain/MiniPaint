@@ -41,6 +41,10 @@ void Shape::set_color(COLORREF in_color)
 {
 	color = in_color;
 }
+void Shape::set_shape_type_id(int id)
+{
+	shape_type_id = id;
+}
 void Shape::set_properties(int &in_topleft_x, int &in_topleft_y, int &in_bottomright_x, int &in_bottomright_y, int const &in_color)
 {
 	topleft_x = in_topleft_x;

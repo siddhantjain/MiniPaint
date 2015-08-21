@@ -18,3 +18,11 @@ void Move::redo(std::shared_ptr<Shape> shape)
 {
 
 }
+void Move::setoldShape(std::shared_ptr<Shape> old_shape)
+{
+	oldShape = old_shape;
+}
+std::shared_ptr<Shape> Move::getoldShape()
+{
+	return oldShape;
+}
