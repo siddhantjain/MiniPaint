@@ -2,13 +2,15 @@
 #include "..\stdafx.h"
 using namespace std;
 using namespace shape_maker;
+using namespace file_maker;
 Resize::Resize()
 {
 
 }
 void Resize::execute(std::shared_ptr<Shape> shape)
 {
-	cout << "Resize executed" << endl;
+	File cur_file;
+	cur_file.replace_shape(shape->get_shape_id(), shape);
 }
 void Resize::undo(std::shared_ptr<Shape> shape)
 {

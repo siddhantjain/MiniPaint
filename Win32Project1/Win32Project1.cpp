@@ -57,6 +57,7 @@ void doFileSave(HWND);
 void doFileOpen(HWND);
 void doUndo(HWND);
 void doRedo(HWND);
+void get_shifted_corners(int* tl_x_new, int* tl_y_new, int* br_x_new, int* br_y_new, int change_in_x, int change_in_y, int mode);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPTSTR    lpCmdLine,
@@ -189,12 +190,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_SHAPE_RECTANGLE:
 			setShape(1);
+			setCommand(0);
 			break;
 		case ID_SHAPE_ELLIPSE:
 			setShape(3);
+			setCommand(0);
 			break;
 		case ID_SHAPE_TRIANGLE:
 			setShape(2);
+			setCommand(0);
 			break;
 		case ID_OPTIONS_DELETE:
 			setCommand(1);
@@ -282,7 +286,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 	startPt.y = y;
 	currentPt.x = x;
 	currentPt.y = y;
-
+	lButtonPress = true;
 	File lButtonFile;
 	vector<shared_ptr<Shape>> list_of_shapes = lButtonFile.get_shape_list();
 	if (shapeValue != -1)
@@ -300,8 +304,10 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 			switch (commandValue)
 			{
 				case 1:
-				{
-					lButtonFile.remove_shape(current_selected_shape_id);
+				{	//Delete Command
+					CommandPtr command_remove(commandFactoryPtr->getCommandObject(4));
+					command_remove->execute(lButtonFile.get_shape(current_selected_shape_id));
+					UndoStack::push_command(command_remove);
 				}
 				break;
 				case 2:
@@ -320,7 +326,6 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 
 					command_fill->execute(new_shape);
 					UndoStack::push_command(command_fill);
-										//lButtonFile.replace_shape
 				}
 			}
 		}
@@ -333,65 +338,130 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 	if (insert_shape)
 	{
 		RECT rect = { x, y, currentPt.x, currentPt.y };
-		InvalidateRect(hWndm, &rect, true); //Invalidate the last drawn shape
+		InvalidateRect(hWndm, &rect, true); 
 		currentPt.x = x;
 		currentPt.y = y;
 	}
-	else if (1/*condition for moving shape*/)
-	{
-		//code for moving shape
+	else if (lButtonPress==true && (commandValue==3 || commandValue == 4))
+	{//move or resize
+			currentPt.x = x;
+			currentPt.y = y;
+			InvalidateRect(hWndm, NULL, true);
 	}
 	return;
 }
 
 void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 {
+	lButtonPress = false;
+	file_maker::File cur_file;
 	if (shapeValue != -1)
 	{
-		file_maker::File cur_file;
+		numOfShapes++;
+		CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 		switch (shapeValue)
 		{
+			
 		case 1:
 		{
-			numOfShapes++;
 			std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_rect);
-			UndoStack::push_command(command_draw);
 		}
 		break;
 		case 3:
 		{
-			numOfShapes++;
 			std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_ellipse);
-			UndoStack::push_command(command_draw);
 		}
 		break;
 		case 2:
 		{
-			numOfShapes++;
 			std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 			command_draw->execute(shape_triangle);
-			UndoStack::push_command(command_draw);
 		}
 		break;
 		}
+		UndoStack::push_command(command_draw);
 		insert_shape = false;
+		//commandValue = -1;
 		shapeValue = -1;
 		InvalidateRect(hWnd, NULL, true);
 	}
 
-	if (1/*condition to test for move and implement code*/)
+	if (commandValue==3)
+	{ //move
+		commandValue = -1;
+		if (current_selected_shape_id == -1)
+		{
+			alert("No shape selected to move");
+			return;
+		}
+		std::shared_ptr<Shape> new_shape;
+		new_shape = cur_file.get_shape(current_selected_shape_id);
+		int change_in_x = currentPt.x - startPt.x;
+		int change_in_y = currentPt.y - startPt.y;
+		int tl_x_new = new_shape->get_topleft_x();
+		int tl_y_new = new_shape->get_topleft_y();
+		int br_x_new = new_shape->get_bottomright_x();
+		int br_y_new = new_shape->get_bottomright_y();
+		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 1);
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
+		command_move->execute(new_shape);
+		UndoStack::push_command(command_move);
+		InvalidateRect(hWnd, NULL, true);
+	}
+	if (commandValue == 4)
 	{
-		//code for implementing move
+		commandValue = -1;
+		if (current_selected_shape_id == -1)
+	{
+			alert("No shape selected to resize");
+			return;
+		}
+		std::shared_ptr<Shape> new_shape;
+		new_shape = cur_file.get_shape(current_selected_shape_id);
+		int change_in_x = currentPt.x - startPt.x;
+		int change_in_y = currentPt.y - startPt.y;
+		int tl_x_new = new_shape->get_topleft_x();
+		int tl_y_new = new_shape->get_topleft_y();
+		int br_x_new = new_shape->get_bottomright_x();
+		int br_y_new = new_shape->get_bottomright_y();
+		get_shifted_corners(&tl_x_new, &tl_y_new, &br_x_new, &br_y_new, change_in_x, change_in_y, 2);
+		new_shape->set_properties(tl_x_new, tl_y_new, br_x_new, br_y_new, new_shape->get_color());
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(3));
+		command_move->execute(new_shape);
+		UndoStack::push_command(command_move);
+		InvalidateRect(hWnd, NULL, true);
 	}
 	return;
 }
 
+void get_shifted_corners(int* tl_x_new, int* tl_y_new, int* br_x_new, int* br_y_new, int change_in_x, int change_in_y, int mode)
+{
+	//move mode
+	if (mode == 1)
+	{
+		*tl_x_new = *tl_x_new + change_in_x;
+		*tl_y_new = *tl_y_new + change_in_y;
+		*br_x_new = *br_x_new + change_in_x;
+		*br_y_new = *br_y_new + change_in_y;
+	}
+	//resize mode
+	else  if (mode == 2)
+	{
+		if ((change_in_x * change_in_y) > 0)
+		{
+			*br_x_new += change_in_x;
+			*br_y_new += change_in_y;
+		}
+		else 
+		{
+			alert("Resize only from bottom right point");
+		}
+	}
 
+}
 //SJ: Paint is what persists the shape on the screen
 //TODO: We need to store everything we paint in a structure. So, everytime we paint, we display every shape that's on the structure.
 //If we do that, the problem of the previous shape disappearing will be gone. 
