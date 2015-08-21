@@ -189,12 +189,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_SHAPE_RECTANGLE:
 			setShape(1);
+			setCommand(0);
 			break;
 		case ID_SHAPE_ELLIPSE:
 			setShape(3);
+			setCommand(0);
 			break;
 		case ID_SHAPE_TRIANGLE:
 			setShape(2);
+			setCommand(0);
 			break;
 		case ID_OPTIONS_DELETE:
 			setCommand(1);
@@ -282,7 +285,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 	startPt.y = y;
 	currentPt.x = x;
 	currentPt.y = y;
-
+	lButtonPress = true;
 	File lButtonFile;
 	vector<shared_ptr<Shape>> list_of_shapes = lButtonFile.get_shape_list();
 	if (shapeValue != -1)
@@ -300,15 +303,14 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 			switch (commandValue)
 			{
 				case 1:
-				{	//removing a command
+				{	//Delete Command
 					CommandPtr command_remove(commandFactoryPtr->getCommandObject(4));
 					command_remove->execute(lButtonFile.get_shape(current_selected_shape_id));
 					UndoStack::push_command(command_remove);
-					
 				}
 				break;
 				case 2:
-				{
+				{	// Fill Command
 					shared_ptr<Shape> new_shape;
 					shared_ptr<Shape> old_shape = lButtonFile.get_shape(current_selected_shape_id);
 					new_shape = old_shape;
@@ -328,12 +330,19 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 	if (insert_shape)
 	{
 		RECT rect = { x, y, currentPt.x, currentPt.y };
-		InvalidateRect(hWndm, &rect, true); //Invalidate the last drawn shape
+		InvalidateRect(hWndm, &rect, true); 
 		currentPt.x = x;
 		currentPt.y = y;
 	}
-	else if (1/*condition for moving shape*/)
-	{
+	else if (lButtonPress==true && (commandValue==3 || commandValue == 4))
+	{//move or resize
+		
+		if (commandValue == 3)//move
+		{
+			currentPt.x = x;
+			currentPt.y = y;
+			InvalidateRect(hWndm, NULL, true);
+		}
 		//code for moving shape
 	}
 	return;
@@ -341,47 +350,57 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 
 void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 {
+	lButtonPress = false;
+	file_maker::File cur_file;
 	if (shapeValue != -1)
 	{
-		file_maker::File cur_file;
+		numOfShapes++;
+		CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
 		switch (shapeValue)
 		{
-		case 1:
-		{
-			numOfShapes++;
-			std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
-			command_draw->execute(shape_rect);
-			UndoStack::push_command(command_draw);
+			
+			case 1:
+			{
+				std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_rect);
+			}
+			break;
+			case 3:
+			{
+				std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_ellipse);
+			}
+			break;
+			case 2:
+			{
+				std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_triangle);
+			}
+			break;
 		}
-		break;
-		case 3:
-		{
-			numOfShapes++;
-			std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
-			command_draw->execute(shape_ellipse);
-			UndoStack::push_command(command_draw);
-		}
-		break;
-		case 2:
-		{
-			numOfShapes++;
-			std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			CommandPtr command_draw(commandFactoryPtr->getCommandObject(1));
-			command_draw->execute(shape_triangle);
-			UndoStack::push_command(command_draw);
-		}
-		break;
-		}
+		UndoStack::push_command(command_draw);
 		insert_shape = false;
+		//commandValue = -1;
 		shapeValue = -1;
 		InvalidateRect(hWnd, NULL, true);
 	}
 
-	if (1/*condition to test for move and implement code*/)
-	{
-		//code for implementing move
+	if (commandValue==3)
+	{ //move
+		commandValue = -1;
+		std::shared_ptr<Shape> new_shape;
+		new_shape = cur_file.get_shape(current_selected_shape_id);
+		int change_in_x = currentPt.x - startPt.x;
+		int change_in_y = currentPt.y - startPt.y;
+		int new_tl_x = new_shape->get_topleft_x() + change_in_x;
+		int new_tl_y = new_shape->get_topleft_y() + change_in_y;
+		int new_br_x = new_shape->get_bottomright_x() + change_in_x;
+		int new_br_y = new_shape->get_bottomright_y() + change_in_y;
+		new_shape->set_properties(new_tl_x, new_tl_y, new_br_x, new_br_y, new_shape->get_color());
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
+		command_move->execute(new_shape);
+		UndoStack::push_command(command_move);
+		InvalidateRect(hWnd, NULL, true);
 	}
 	return;
 }

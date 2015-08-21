@@ -1,5 +1,6 @@
 #include "Command.h"
 #include "Shape.h"
+#include "file.h"
 #ifndef MOVE_H
 #define MOVE_H
 namespace shape_maker
