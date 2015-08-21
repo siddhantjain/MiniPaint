@@ -336,14 +336,9 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 	}
 	else if (lButtonPress==true && (commandValue==3 || commandValue == 4))
 	{//move or resize
-		
-		if (commandValue == 3)//move
-		{
 			currentPt.x = x;
 			currentPt.y = y;
 			InvalidateRect(hWndm, NULL, true);
-		}
-		//code for moving shape
 	}
 	return;
 }
@@ -398,6 +393,23 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 		int new_br_y = new_shape->get_bottomright_y() + change_in_y;
 		new_shape->set_properties(new_tl_x, new_tl_y, new_br_x, new_br_y, new_shape->get_color());
 		CommandPtr command_move(commandFactoryPtr->getCommandObject(5));
+		command_move->execute(new_shape);
+		UndoStack::push_command(command_move);
+		InvalidateRect(hWnd, NULL, true);
+	}
+	if (commandValue == 4)
+	{
+		commandValue = -1;
+		std::shared_ptr<Shape> new_shape;
+		new_shape = cur_file.get_shape(current_selected_shape_id);
+		int change_in_x = currentPt.x - startPt.x;
+		int change_in_y = currentPt.y - startPt.y;
+		int tl_x = new_shape->get_topleft_x();
+		int tl_y = new_shape->get_topleft_y();
+		int new_br_x = new_shape->get_bottomright_x() + change_in_x;
+		int new_br_y = new_shape->get_bottomright_y() + change_in_y;
+		new_shape->set_properties(tl_x, tl_y, new_br_x, new_br_y, new_shape->get_color());
+		CommandPtr command_move(commandFactoryPtr->getCommandObject(3));
 		command_move->execute(new_shape);
 		UndoStack::push_command(command_move);
 		InvalidateRect(hWnd, NULL, true);

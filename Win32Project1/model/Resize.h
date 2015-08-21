@@ -1,4 +1,5 @@
 #include "Command.h"
+#include "file.h"
 #ifndef RESIZE_H
 #define RESIZE_H
 namespace shape_maker
