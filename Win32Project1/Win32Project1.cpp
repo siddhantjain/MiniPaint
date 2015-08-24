@@ -350,7 +350,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 		//Code to decide on which shape is selected
 		shape_select shape_selector;
 		current_selected_shape_id = shape_selector.which_shape(x, y);
-		InvalidateRect(hWnd, NULL, true);
+		//InvalidateRect(hWnd, NULL, true);
 		show_bounding_box = true;
 		InvalidateRect(hWnd, NULL, true);
 		if (current_selected_shape_id > 0)
