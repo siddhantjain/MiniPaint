@@ -57,6 +57,7 @@ void doFileSave(HWND);
 void doFileOpen(HWND);
 void doUndo(HWND);
 void doRedo(HWND);
+void preview_shape(HWND, POINT starting_pt, POINT ending_pt);
 void get_shifted_corners(int* tl_x_new, int* tl_y_new, int* br_x_new, int* br_y_new, int change_in_x, int change_in_y, int mode);
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -268,30 +269,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			setCommand(1);
 		}
-		if (c == 'Z')
+		else if (c == 'Z')
 		{
 			doUndo(hWnd);
 		}
-		if (c == 'X')
+		else if (c == 'X')
 		{
 			doRedo(hWnd);
 		}
-		if (c == 'M')
+		else if (c == 'M')
 		{
 			setCommand(3);
 		}
-		if (c == 'R')
+		else if (c == 'R')
 		{
 			setCommand(4);
 		}
-		if (c == 'S')
+		else if (c == 'S')
 		{
 			doFileSave(hWnd);
 		}
-		if (c == 'O')
+		else if (c == 'O')
 		{
 			doFileOpen(hWnd);
 		}
+		else if (c == 'F')
+		{
+			static COLORREF arr_colors[16];
+			CHOOSECOLOR lpcc;
+			ZeroMemory(&lpcc, sizeof(lpcc));
+			lpcc.lStructSize = sizeof(CHOOSECOLOR);
+			lpcc.hwndOwner = NULL;
+			lpcc.lpCustColors = arr_colors;
+			lpcc.Flags = CC_FULLOPEN;
+			if (ChooseColor(&lpcc))
+			{
+				selected_color = lpcc.rgbResult;
+			}
+			setCommand(2);
+		}
+
 	}
 	break;
 	case WM_DESTROY:
@@ -325,7 +342,10 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 	File lButtonFile;
 	vector<shared_ptr<Shape>> list_of_shapes = lButtonFile.get_shape_list();
 	if (shapeValue != -1)
+	{
 		insert_shape = true;
+		//preview_shape(hWnd);
+	}
 	else
 	{
 		//Code to decide on which shape is selected
@@ -343,6 +363,7 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 					CommandPtr command_remove(commandFactoryPtr->getCommandObject(4));
 					command_remove->execute(lButtonFile.get_shape(current_selected_shape_id));
 					UndoStack::push_command(command_remove);
+					current_selected_shape_id = 0;
 				}
 				break;
 				case 2:
@@ -370,18 +391,33 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 
 void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 {
+	File cur_file;
 	if (insert_shape)
 	{
 		RECT rect = { x, y, currentPt.x, currentPt.y };
 		InvalidateRect(hWndm, &rect, true); 
+		preview_shape(hWndm,startPt,currentPt);
 		currentPt.x = x;
 		currentPt.y = y;
+		preview_shape(hWndm,startPt,currentPt);
 	}
 	else if (lButtonPress==true && (commandValue==3 || commandValue == 4))
-	{//move or resize
+	{
+		if (commandValue == 4)
+		{
+			POINT shape_start_pt = POINT{ cur_file.get_shape(current_selected_shape_id)->get_topleft_x(),
+				cur_file.get_shape(current_selected_shape_id)->get_topleft_y() };
+			preview_shape(hWndm, shape_start_pt, currentPt);
 			currentPt.x = x;
 			currentPt.y = y;
-			InvalidateRect(hWndm, NULL, true);
+			preview_shape(hWndm, shape_start_pt, currentPt);
+		}
+		else
+		{
+			currentPt.x = x;
+			currentPt.y = y;
+		}
+		//InvalidateRect(hWndm, NULL, true);
 	}
 	return;
 }
@@ -397,24 +433,24 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 		switch (shapeValue)
 		{
 			
-		case 1:
-		{
-			std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			command_draw->execute(shape_rect);
-		}
-		break;
-		case 3:
-		{
-			std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			command_draw->execute(shape_ellipse);
-		}
-		break;
-		case 2:
-		{
-			std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
-			command_draw->execute(shape_triangle);
-		}
-		break;
+			case 1:
+			{
+				std::shared_ptr<Shape> shape_rect(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_rect);
+			}
+			break;
+			case 3:
+			{
+				std::shared_ptr<Shape> shape_ellipse(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_ellipse);
+			}
+			break;
+			case 2:
+			{
+				std::shared_ptr<Shape> shape_triangle(shapeFactoryPtr->getShapeObject(shapeValue, numOfShapes, startPt.x, startPt.y, currentPt.x, currentPt.y, cur_color));
+				command_draw->execute(shape_triangle);
+			}
+			break;
 		}
 		UndoStack::push_command(command_draw);
 		insert_shape = false;
@@ -551,6 +587,41 @@ void paint(HWND hWnd)
 		painter.show_bounding_box(current_selected_shape_id);
 	}
 	::EndPaint(hWnd, &ps);
+}
+
+void preview_shape(HWND hWnd, POINT prev_start_pt, POINT prev_curr_pt)
+{
+	HDC hdc;
+	hdc = ::GetDC(hWnd);
+	::SetROP2(hdc, R2_NOT);
+	::SelectObject(hdc, ::GetStockObject(NULL_BRUSH));
+	File cur_file;
+	//alert(current_selected_shape_id);
+	int current_shape_type_id = current_selected_shape_id > 0 ? cur_file.get_shape(current_selected_shape_id)->get_type_id() : shapeValue;
+	//alert(sizeof((*temp)));
+	switch (current_shape_type_id)
+	{
+	case 1:
+		::Rectangle(hdc, prev_start_pt.x, prev_start_pt.y, prev_curr_pt.x, prev_curr_pt.y);
+		break;
+	case 3:
+		::Ellipse(hdc, prev_start_pt.x, prev_start_pt.y, prev_curr_pt.x, prev_curr_pt.y);
+		break;
+	case 2:
+	{
+		POINT P1, P2, P3;
+		P1.x = (prev_curr_pt.x + prev_start_pt.x) / 2;
+		P1.y = prev_start_pt.y;
+		P2.x = prev_start_pt.x;
+		P2.y = prev_curr_pt.y;
+		P3.x = prev_curr_pt.x;
+		P3.y = prev_curr_pt.y;
+		POINT vertices[] = { P1, P2, P3 };
+		::Polygon(hdc, vertices, 3);
+	}
+	break;
+	}
+	::ReleaseDC(hWnd, hdc);
 }
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
