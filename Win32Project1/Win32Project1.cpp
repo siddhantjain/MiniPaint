@@ -453,7 +453,6 @@ void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 		}
 		UndoStack::push_command(command_draw);
 		insert_shape = false;
-		//commandValue = -1;
 		shapeValue = -1;
 		InvalidateRect(hWnd, NULL, true);
 	}
@@ -596,10 +595,13 @@ void preview_shape(HWND hWnd, POINT prev_start_pt, POINT prev_curr_pt)
 	::SelectObject(hdc, ::GetStockObject(NULL_BRUSH));
 	File cur_file;
 	//alert(current_selected_shape_id);
-	int current_shape_type_id = current_selected_shape_id > 0 ? cur_file.get_shape(current_selected_shape_id)->get_type_id() : shapeValue;
+	int current_shape_type_id = insert_shape ? shapeValue : current_selected_shape_id ? cur_file.get_shape(current_selected_shape_id)->get_type_id():0;
 	//alert(sizeof((*temp)));
 	switch (current_shape_type_id)
 	{
+	case 0:
+		return;
+		break;
 	case 1:
 		::Rectangle(hdc, prev_start_pt.x, prev_start_pt.y, prev_curr_pt.x, prev_curr_pt.y);
 		break;
