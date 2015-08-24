@@ -148,6 +148,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	{
 		return FALSE;
 	}
+	
+	HMENU hMenu = GetMenu(hWnd);
+	EnableMenuItem(hMenu, ID_OPTIONS_UNDO, MF_DISABLED|MF_GRAYED);
+	EnableMenuItem(hMenu, ID_OPTIONS_REDO, MF_DISABLED | MF_GRAYED);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
@@ -268,11 +272,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			setCommand(1);
 		}
-		else if (c == 'Z')
+		else if (c == 'Z' && (UndoStack::getSize()>0))
 		{
 			doUndo(hWnd);
 		}
-		else if (c == 'X')
+		else if (c == 'X' && (RedoStack::getSize()>0))
 		{
 			doRedo(hWnd);
 		}
@@ -355,6 +359,12 @@ void onLButtonDown(HWND hWnd, UINT wParam, UINT x, UINT y)
 		InvalidateRect(hWnd, NULL, true);
 		if (current_selected_shape_id > 0)
 		{
+			int undoStackSize = UndoStack::getSize();
+			if (undoStackSize < 1)
+			{
+				HMENU hMenu = GetMenu(hWnd);
+				EnableMenuItem(hMenu, ID_OPTIONS_UNDO, MF_ENABLED);
+			}
 			switch (commandValue)
 			{
 				case 1:
@@ -421,6 +431,12 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 
 void onLButtonUp(HWND hWnd, UINT wParam, UINT x, UINT y)
 {
+	int undoStackSize = UndoStack::getSize();
+	if (undoStackSize < 1)
+	{
+			HMENU hMenu = GetMenu(hWnd);
+			EnableMenuItem(hMenu, ID_OPTIONS_UNDO, MF_ENABLED);
+	}
 	lButtonPress = false;
 	file_maker::File cur_file;
 	if (shapeValue != -1)
@@ -794,6 +810,12 @@ void doFileOpen(HWND hDlg)
 void doUndo(HWND hWnd)
 {
 	CommandPtr commandObject = UndoStack::pop_command();
+	int undoStackSize = UndoStack::getSize();
+	if (undoStackSize < 1)
+	{
+		HMENU hMenu = GetMenu(hWnd);
+		EnableMenuItem(hMenu, ID_OPTIONS_UNDO, MF_DISABLED | MF_GRAYED);
+	}
 	shared_ptr<Shape> shapeObject = commandObject->getoldShape();
 	File cur_file;
 	if (shapeObject!=NULL)
@@ -808,21 +830,23 @@ void doUndo(HWND hWnd)
 		commandObject->undo(File::get_shape_list()[index]);
 	}
 	RedoStack::push_command(commandObject);
-
+	if (RedoStack::getSize() == 1)
+	{
+		HMENU hMenu = GetMenu(hWnd);
+		EnableMenuItem(hMenu, ID_OPTIONS_REDO, MF_ENABLED);
+	}
 	InvalidateRect(hWnd,NULL,TRUE);
 	UpdateWindow(hWnd);
 }
 void doRedo(HWND hWnd)
 {
 	CommandPtr commandObject = RedoStack::pop_command();
-	/*vector<shared_ptr<Shape>> shapeList = File::get_shape_list();
-	int index = File::get_shape_list().size() - 1;
-	shared_ptr<Shape> shapeObject;
-	if (index > -1)
-		shapeObject= shapeList[index];
-	else
-		shapeObject = NULL;
-	commandObject->redo(shapeObject);*/
+	int redoStackSize = RedoStack::getSize();
+	if (redoStackSize < 1)
+	{
+		HMENU hMenu = GetMenu(hWnd);
+		EnableMenuItem(hMenu, ID_OPTIONS_REDO, MF_DISABLED | MF_GRAYED);
+	}
 	shared_ptr<Shape> shapeObject = commandObject->getoldShape();
 	File cur_file;
 	if (shapeObject != NULL)
@@ -837,6 +861,11 @@ void doRedo(HWND hWnd)
 		commandObject->redo(File::get_shape_list()[index]);
 	}
 	UndoStack::push_command(commandObject);
+	if (UndoStack::getSize() == 1)
+	{
+		HMENU hMenu = GetMenu(hWnd);
+		EnableMenuItem(hMenu, ID_OPTIONS_UNDO, MF_ENABLED);
+	}
 	InvalidateRect(hWnd, NULL, TRUE);
 	UpdateWindow(hWnd);
 }

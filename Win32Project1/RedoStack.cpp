@@ -14,4 +14,8 @@ shape_maker::CommandPtr RedoStack::pop_command()
 	else
 		return NULL;
 }
+int RedoStack::getSize()
+{
+	return redostack.size();
+}
 std::stack<shape_maker::CommandPtr> RedoStack::redostack;

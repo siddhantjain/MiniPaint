@@ -10,5 +10,6 @@ private:
 public:
 	static void push_command(shape_maker::CommandPtr);
 	static shape_maker::CommandPtr pop_command();
+	static int getSize();
 };
 #endif
