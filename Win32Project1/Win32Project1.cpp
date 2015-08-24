@@ -261,12 +261,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		paint(hWnd);
 	}
 	break;
+	case WM_CHAR: //Keyboard Shortcuts
+	{
+		char c = (TCHAR)wParam;
+		if (c == 'D')
+		{
+			setCommand(1);
+		}
+		if (c == 'Z')
+		{
+			doUndo(hWnd);
+		}
+		if (c == 'X')
+		{
+			doRedo(hWnd);
+		}
+		if (c == 'M')
+		{
+			setCommand(3);
+		}
+		if (c == 'R')
+		{
+			setCommand(4);
+		}
+		if (c == 'S')
+		{
+			doFileSave(hWnd);
+		}
+		if (c == 'O')
+		{
+			doFileOpen(hWnd);
+		}
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+	
 	return 0;
 }
 
