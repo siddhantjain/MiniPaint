@@ -392,9 +392,7 @@ void onMouseMove(HWND hWndm, UINT wParam, UINT x, UINT y)
 {
 	File cur_file;
 	if (insert_shape)
-	{
-		RECT rect = { x, y, currentPt.x, currentPt.y };
-		InvalidateRect(hWndm, &rect, true); 
+	{ 
 		preview_shape(hWndm,startPt,currentPt);
 		currentPt.x = x;
 		currentPt.y = y;
@@ -597,6 +595,8 @@ void preview_shape(HWND hWnd, POINT prev_start_pt, POINT prev_curr_pt)
 	//alert(current_selected_shape_id);
 	int current_shape_type_id = insert_shape ? shapeValue : current_selected_shape_id ? cur_file.get_shape(current_selected_shape_id)->get_type_id():0;
 	//alert(sizeof((*temp)));
+	//InvalidateRect(hWnd, NULL, true);
+
 	switch (current_shape_type_id)
 	{
 	case 0:
